@@ -1,0 +1,28 @@
+\section{Discussion: two treatments of a sparse \Seg{} token}
+\label{sec:discussion}
+
+The empirical core is that a 20-D corridor can be rasterized, and that the sparse \Seg{} prompt DeSa2VA locates \emph{inside} the token can be addressed from the \emph{decoder} side, not only by splitting the token.
+
+\paragraph{Carrier replacement vs.\ DeSa2VA's architectural decoupling.}
+DeSa2VA \citep{dang2025desa2va} splits a Sa2VA hidden state into text and visual streams \emph{before} SAM2, because a single \Seg{} token cannot carry both semantics and a dense visual prompt.
+ECF never splits that state and never asks SAM2 to become a better prompt reader; it lets the entangled token bind a caption to an object---what language models already do---and writes the dense spatial structure as $\phih$.
+Two independent observations support this reading.
+First, A1: the same $h$ that rasterizes a rail is a useless SAM2 prompt (2.43 gIoU), so the information is in the ParamHead$+\cR$ path, not in some latent SAM2-compatible embedding.
+Second, DeSa2VA's own ablation shows that extra text-derived mask supervision into an entangled \Seg{} pathway hurts Sa2VA (RefCOCO 78.9$\to$73.4 without decoupling).
+We do not feed extra text into SAM2; we stop feeding $h$ into SAM2 on the evaluated path, and we are not claiming to reproduce DeSa2VA's RefCOCO gains, only that the sparse-prompt diagnosis has a decoder-side, geometric treatment as well as an encoder-side one.
+
+\paragraph{Low-dimensional corridors vs.\ free masks.}
+Parametric lane heads \citep{tabelini2021polylanenet,feng2022bezierlanenet} already treat ego-view rails as polylines.
+What is new here is the \emph{binding}: the polyline is the meaning of a referring \Seg{} token inside an MLLM, trained with a raster closed loop so that language gradients and geometry gradients share $h$.
+Figure~\ref{fig:framework} draws this forward path (Section~\ref{sec:method}), and Figure~\ref{fig:display} shows the shapes the field must cover across this split.
+A2 shows the loop is load-bearing: without $\mathcal{L}_{\mathrm{mask}}$, \PrAt{0.7} drops to 54.81 even though a parameter loss is present.
+
+\paragraph{Carrier versus backbone.}
+The control that isolates the carrier is internal to our system rather than external: A1 reuses the same trained LoRA and ParamHead and changes only where the mask comes from, giving 2.43 versus 80.67 gIoU.
+That already undercuts the trivial reading that the masks come from the language backbone.
+The carrier claim itself stands on A1 and on the failure mode of Figure~\ref{fig:qual} row 4, where high-IoU masks land on the wrong rail: on this target, decoder strength by itself did not deliver target selection; changing the carrier did.
+
+\paragraph{What this paper does and does not replace.}
+The two treatments are not substitutes: decoupling improves the encoder-side prompt that a generalist SAM2 receives, while ECF assumes a corridor target and changes the decoder.
+A natural next system would combine them: DeSa2VA-style split heads so that language remains rich, plus $\cR$ so that the visual stream carries a corridor field, with a verifier for forks that the two topology logits currently ignore.
+Orthogonal work can still improve the \emph{training signal}, e.g.\ token-weighted GRPO for video reasoning with focused thinking \citep{dang2025twgrpo}; this paper leaves RL aside and changes the mask carrier.

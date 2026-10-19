@@ -1,0 +1,14 @@
+\begin{abstract}
+Referring expression segmentation (RES) couples a multimodal large language model with a frozen SAM2 decoder through a shared segmentation token.
+In an ego-view rail frame, language already names the rail, so the task is to produce a corridor mask whose shape is more compactly described by parameters than by pixels.
+Should that token state be decoded into a free-form SAM2 mask at all?
+We replace the mask decoder with an Ego-Corridor Field (ECF): a small head maps the same token to 20 corridor parameters (centerline, width, vanishing point, topology) that a differentiable rasterizer turns into a mask, bypassing the SAM2 mask losses.
+On FIRC2234 (208 original test frames, fp32), ECF-native decoding reaches 80.67 gIoU (97.6 and 87.98 precision at 0.5 and 0.7 IoU), outperforming same-protocol GroundingDINO+SAM2 (28.18) and Qwen2.5-VL-7B+SAM2 (25.60) by 2.9--3.2$\times$, and pretrained Sa2VA (14.32) by 5.6$\times$.
+These three systems form the off-the-shelf reference set, the only comparison available for a benchmark introduced here.
+ECF adds a $4.75$\,M-parameter head (0.205\% of the backbone) plus a $147.7$\,M LoRA adapter, and transfers eval-only to RailSem19-EgoPair (66.93) and RailBench 1L1R (54.21); its matched-training control (A1) collapses to 2.43 gIoU when SAM2 decodes the same state.
+Code and evaluation scripts will be released at \url{https://github.com/lzdxwyh/ecf-corridor-fields} upon acceptance.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Referring expression segmentation, railway scene understanding, differentiable rasterization, multimodal large language model.
+\end{IEEEkeywords}

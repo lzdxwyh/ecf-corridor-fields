@@ -1,0 +1,71 @@
+% IEEE TCSVT requires the IEEEtran class (Transactions Paper).  The previous
+% article[10pt,twocolumn,letterpaper]+geometry layout rendered this manuscript at
+% 16 pages; IEEEtran renders the identical body at 14 pages, which is exactly the
+% TCSVT ceiling (see results/xtragpt/compile_20261002_r6/ECF_ieeetran_probe.pdf and
+% the round-10 heartbeat entry).
+\documentclass[journal,10pt]{IEEEtran}
+\usepackage{times}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{tabularx}
+% dblfloatfix: corrects IEEEtran double-column figure* placement so that [b]
+% (page-bottom) works for full-width floats, letting two full-width figures on the
+% same page be split top/bottom instead of stacking back-to-back at the top.
+\usepackage{dblfloatfix}
+% Twocolumn: wide tables use table*+tabularx; in-column tables use
+% tabularx{\columnwidth}; long display math uses aligned/split.
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\usepackage{natbib}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+
+% Figure-heavy manuscript: allow pages that are mostly floats so that full-width
+% figure* environments are not deferred past the bibliography.
+\setcounter{topnumber}{3}
+\setcounter{dbltopnumber}{3}
+\setcounter{totalnumber}{6}
+\renewcommand{\topfraction}{0.95}
+\renewcommand{\dbltopfraction}{0.95}
+\renewcommand{\bottomfraction}{0.9}
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\floatpagefraction}{0.7}
+\renewcommand{\dblfloatpagefraction}{0.7}
+
+% IEEEtran template convention: relax the penalty on page breaks inside displays.
+\interdisplaylinepenalty=2500
+
+\input{math_commands}
+
+\title{Ego-Corridor Fields:\\
+Differentiable Corridor Rasterization\\
+for Referring Rail Segmentation}
+\author{Anonymous Authors}
+\date{}
+
+\begin{document}
+\maketitle
+
+\input{sections/00_abstract}
+\input{sections/01_introduction}
+\input{sections/02_related_work}
+\input{sections/03_method}
+\input{sections/04_experiments}
+\input{sections/05b_discussion}
+\input{sections/05_conclusion}
+
+% Appendix A was moved out of the manuscript into the standalone supplementary
+% document (main_supplementary.tex + sections/A_appendix_supp.tex) to bring the
+% Transactions Paper inside the IEEE TCSVT 14-page ceiling.  The content was moved,
+% not deleted: sections/A_appendix.tex is kept in the source tree as the record.
+
+% Flush every pending float before the bibliography so that no figure is
+% emitted after the reference list (figure-heavy, full-width floats).
+\clearpage
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}

@@ -1,0 +1,149 @@
+\section{Appendix}
+
+\subsection{Positioning relative to DeSa2VA and parametric lanes}
+\label{app:position}
+
+Table~\ref{tab:pos} summarizes what we take from the closest architectural and geometric lines and what we do not claim.
+DeSa2VA is not re-run on FIRC2234: it is an architectural fork of Sa2VA trained on RefCOCO-family and video-RES mixtures, and PolyLaneNet / B\'ezierLaneNet are lane detectors, not LMM referring models.
+The table is a mechanistic comparison, not a leaderboard.
+
+\begin{table*}[t]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\caption{Mechanistic positioning. Numbers in this paper remain FIRC-only; DeSa2VA and lane-detector numbers stay on their native benchmarks.}
+\label{tab:pos}
+\begin{tabularx}{\textwidth}{@{}lXXX@{}}
+\toprule
+ & DeSa2VA \citep{dang2025desa2va} & Poly/B\'ezier lane heads \citep{tabelini2021polylanenet,feng2022bezierlanenet} & This paper \\
+\midrule
+Special token & shared \Seg{}, then split & none (CNN detector) & shared \Seg{} (undecoupled) \\
+Mask carrier & SAM2 after decoupling & polynomial / B\'ezier curve & $\phih \to \cR$ (SAM2 bypassed) \\
+Reported failure & extra text into entangled SAM2 hurts Sa2VA & N/A on RES & A1: same $h$ $\to$ SAM2 is 2.43 gIoU \\
+What we borrow & sparse-\Seg{} diagnosis & low-D corridor carrier & --- \\
+What we do not do & linear split, CLUB, mask-reprompt & CULane/TuSimple re-implementation & --- \\
+\bottomrule
+\end{tabularx}
+\end{table*}
+
+\subsection{SAM2 zero-shot oracle: segmenter probe}
+\label{app:oracle}
+
+We additionally measured a SAM2 \citep{ravi2024sam2} zero-shot \emph{oracle}: for each test image we auto-segment an $8{\times}8$ point grid (192 candidate masks) and \emph{oracle-select} the candidate with the highest IoU against ground truth, reaching gIoU 74.88.
+This oracle is \emph{not deployable}: it has no mechanism to choose the target among candidates and requires ground-truth at selection time, so we use it only as a probe of what the frozen-SAM2 segmenter can yield on this split, not as a reference row.
+One reading follows: detector+SAM2 pipelines (25--28) leave most of this headroom on the table---the bottleneck is ordinal target selection under language, not SAM2's ability to paint a blob.
+We do not treat 74.88 as a reference row in Table~\ref{tab:main}.
+
+\subsection{Literature level references (different datasets)}
+\label{app:lit}
+
+Table~\ref{tab:lit} lists public numbers from related literature; the datasets differ from FIRC2234, so these rows serve only as a \emph{level} reference, not a comparison.
+
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{3pt}
+\caption{Literature level references. RefCOCO / RailSem19 / CULane are different benchmarks from FIRC2234.}
+\label{tab:lit}
+\begin{tabularx}{\columnwidth}{@{}Ycc@{}}
+\toprule
+Method & Dataset & Number \\
+\midrule
+LISA \citep{lai2024lisa} & RefCOCO val & gIoU ${\approx}74.9$ \\
+GLaMM \citep{rasheed2024glamm} & RefCOCO val & gIoU ${\approx}75.0$ \\
+Sa2VA-4B \citep{zhang2025sa2va} & RefCOCO & 78.9 \\
+DeSa2VA-4B \citep{dang2025desa2va} & RefCOCO & 82.6 \\
+DeSa2VA ablation (text pre-training w/o decoupling) & RefCOCO & 78.9$\to$73.4 \\
+RailSem19-family rail segmentation \citep{zendel2019railsem19} & RailSem19 & mIoU 55--75 \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Label ReconIoU}
+\label{app:recon}
+
+Offline, each FIRC mask is converted to $\phih^{gt}$ (vanishing point, four centerline points, left/right widths) and rasterized with a non-learned numpy renderer used only for label QA.
+Median reconstruction IoU is $0.889$ (train, $n{=}1664$), $0.892$ (train hflip), $0.890$ (val), $0.891$ (test).
+The E0 gate (median ${\ge}0.85$) passes on all splits: a 20-D corridor is an adequate \emph{label} for this annotation style.
+Training then uses the \emph{differentiable} $\cR$ of Section~\ref{sec:rast}, which is similar in spirit (polyline + width) but is not the same renderer: $\cR$ reduces the width profile to a single scalar per side, so $\phih^{gt}$ is not the overlap-optimal parameter vector for $\cR$.
+Replaying the QA labels through $\cR$ at full resolution therefore scores well below the QA figure (global IoU $0.69$ at $K{=}4$ over the $n{=}208$ test frames, against $0.891$ for the QA renderer).
+The ReconIoU numbers above bound the \emph{label}, not the trained decoder; the trained number is the \gIou{} in Table~\ref{tab:main}.
+
+This quantization cost is deliberate and measurable rather than an artifact of the QA renderer: the 20-D carrier discards the width \emph{profile} along the corridor (Section~\ref{sec:rast}), so the ${\approx}0.11$ reconstruction gap is a floor on what any decoder of $\phih$ can recover.
+Continuous or higher-dimensional carriers, for instance the interpolated token space of \citet{li2026momentorpp}, trade parameters for exactly this fidelity, and we accept the trade because for a corridor target class $\phih^{gt}$ is already the annotation.
+
+\subsection{Inference cost of the ECF-native path}
+\label{app:cost}
+
+Table~\ref{tab:cost} reports the measured cost of the stage that replaces SAM2 mask decoding.
+All rows are fp32, batch $1$, $550{\times}550$ input, on a single A100-class GPU; the ParamHead and the rasterizer are timed individually, and the end-to-end figure is a full `\texttt{predict\_ecf\_mask}` call after a warm-up iteration, over $3$ timed repetitions.
+The rasterizer is a fixed, parameter-free function of $\phih$, so its ``parameters'' entry is the cost of the module and not of a learned tensor.
+
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\caption{Inference cost of the ECF-native decoder, fp32, batch $1$, $550{\times}550$, one A100-class GPU. The end-to-end figure is a full decoder call and includes the shared MLLM forward pass, which dominates it and is identical across carriers; the mask-production path (parameterization, rasterization, thresholding) accounts for $2.42\%$ of it.}
+\label{tab:cost}
+\begin{tabularx}{\columnwidth}{@{}Yrr@{}}
+\toprule
+Component & Parameters & Latency (ms) \\
+\midrule
+ParamHead $f_\psi$ ($h\!\to\!\phih$) & $4.75$\,M & $2.30$ \\
+Differentiable rasterizer $\cR$ & --- (fixed) & $2.90$ \\
+\midrule
+ECF-native end to end & $4.75$\,M & $214.6 \pm 14.2$ \\
+\quad as share of backbone & $0.205\%$ & $2.42\%$ \\
+\midrule
+Peak allocated VRAM & \multicolumn{2}{r}{$8.92$\,GB} \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+Two readings of these numbers matter for the paper's claim.
+First, the mask-side trainable footprint is $4.75$\,M parameters against a $2316.2$\,M-parameter backbone ($0.205\%$), because the rasterizer is fixed: replacing the dense SAM2 mask decoder with $\cR$ removes a decoder from the trainable graph rather than adding one.
+Second, the mask-production stage is $2.42\%$ of the measured end-to-end latency, so the carrier is not the runtime bottleneck: reducing the dimension of $\phih$ cannot yield meaningful savings, and the remaining cost is the shared MLLM forward pass that every carrier pays.
+The LoRA-rank sweep of Table~\ref{tab:lora} shows the same for the adapters: halving the rank halves LoRA parameters at a cost of $1.7$ gIoU on the checkpoint it was measured on.
+
+\begin{table}[t]
+\centering
+\small
+\setlength{\tabcolsep}{4pt}
+\caption{LoRA-rank sweep on an early ECF checkpoint, same fp32 $550{\times}550$ protocol. Reported to show that the trainable budget is tunable; the ranks were not re-evaluated on the final augmented checkpoint, so the \gIou{} column is not comparable to Table~\ref{tab:main}.}
+\label{tab:lora}
+\begin{tabularx}{\columnwidth}{@{}r r r r@{}}
+\toprule
+Rank & LoRA params & \gIou & Latency (ms) \\
+\midrule
+$128$ & $147.7$\,M & $49.12$ & $236.3$ \\
+$64$  & $73.9$\,M  & $47.43$ & $189.7$ \\
+$32$  & $36.9$\,M  & $47.03$ & $196.7$ \\
+$16$  & $18.5$\,M  & $48.47$ & $204.0$ \\
+\bottomrule
+\end{tabularx}
+\end{table}
+
+\subsection{Hyperparameters}
+\label{app:hparams}
+
+\textbf{Architecture.} InternVL3-2B with the SAM2 codebase; the vision encoder is frozen.
+LoRA has rank $128$, $\alpha{=}256$, dropout $0.05$, and is applied to the language model's linear projections; the embedding table and the language-model head remain trainable.
+ParamHead: $1536 \to 1536 \to 1536 \to 20$, ReLU, last-layer weight zeros, identity-safe bias.
+Rasterizer temperature $\tau{=}2$, densify samples $32$.
+We add no extra corridor vocabulary token: an additional embedding row would be untrained against the pretrained vocabulary and would perturb tokenizer alignment.
+
+\textbf{Loss.} $\lambda_{\mathrm{mask}}{=}1.0$, $\lambda_{\mathrm{par}}{=}0.5$, $\lambda_{\mathrm{topo}}{=}0.2$ (the topology logits are not used as a decision head; Verifier off), $\lambda_{\mathrm{ver}}{=}0.3$ with Verifier weights frozen.
+A weak width-monotonicity term ($0.1$) and a far-row mask weight ($\gamma{=}1.0$) are present in the reported run and are \emph{not} claimed; a later, heavier physics-oriented recipe (gated far-weight, retuned $\gamma$) did not improve the far field and is not a main result.
+When SAM2 decoding is bypassed, the SAM2 mask and dice losses are replaced by a finite zero, so that no undefined gradients propagate through the unused branch.
+
+\textbf{Optimization.} AdamW ($\beta{=}(0.9,0.999)$), lr $4{\times}10^{-5}$, weight decay $0.05$, grad clip $0.5$, AMP fp16, batch 1, warmup 5\% + cosine to 0, 4 epochs $\times$ 10 repeats of 3328 train frames (1664 original $\cup$ 1664 hflip) $= 133{,}120$ iterations, initialized from the official InternVL3-2B Sa2VA checkpoint; seed 42.
+This is a single training schedule.
+
+\textbf{A2.} The $\lambda_{\mathrm{mask}}{=}0$ row is an architecture-identical retrain under the same orig$\cup$hflip schedule and budget, not a decode-mode switch of the main weights; the only difference from the main row is the presence of the raster mask loss.
+
+\subsection{Reproducibility of the evaluation protocol}
+\label{app:repro}
+
+ECF-native numbers are generated in fp32: take the first \Seg{} hidden state, apply ParamHead $\to \cR$, threshold at $0.5$.
+A1 uses the same LoRA and ParamHead weights but routes the \Seg{} embedding through SAM2, also in fp32, and detector reference rows use the same 208-frame test split, original captions, and mask-IoU protocol.
+fp16 evaluation is never reported: under fp16 the \Seg{} decoding collapses.

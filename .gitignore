@@ -1,0 +1,26 @@
+# Whitelist: keep only the manuscript source and the eight figures the paper includes.
+/*
+!/.gitignore
+!/README.md
+!/main.tex
+!/main_supplementary.tex
+!/math_commands.tex
+!/references.bib
+!/_build_combined_local.py
+!/_build_supp_combined_local.py
+!/sections/
+!/figures/
+
+# Section sources: drop editor/branch backups.
+sections/*.bak_*
+
+# Figures: only the eight files included by the manuscript.
+figures/*
+!figures/ecf_framework_vec.pdf
+!figures/ecf_teaser_redraw.png
+!figures/ecf_forward_vec.pdf
+!figures/ecf_pipeline_vec.pdf
+!figures/ecf_rasterizer_vec.pdf
+!figures/fig2_firc_dataset.pdf
+!figures/fig1_qual.jpg
+!figures/fig5_rail_qual.png

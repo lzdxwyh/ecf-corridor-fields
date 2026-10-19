@@ -1,0 +1,59 @@
+% Supplementary material of the ECF paper.  Same class as the manuscript
+% (IEEEtran, required by IEEE TCSVT) so the two documents are typographically
+% identical for the reviewer.
+\documentclass[journal,10pt]{IEEEtran}
+\usepackage{times}
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{tabularx}
+% Twocolumn: wide tables use table*+tabularx; in-column tables use
+% tabularx{\columnwidth}; long display math uses aligned/split.
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+\usepackage{natbib}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+
+\setcounter{topnumber}{3}
+\setcounter{dbltopnumber}{3}
+\setcounter{totalnumber}{6}
+\renewcommand{\topfraction}{0.95}
+\renewcommand{\dbltopfraction}{0.95}
+\renewcommand{\bottomfraction}{0.9}
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\floatpagefraction}{0.7}
+\renewcommand{\dblfloatpagefraction}{0.7}
+
+\interdisplaylinepenalty=2500
+
+\input{math_commands}
+
+\title{Supplementary Material for\\
+Ego-Corridor Fields:\\
+Differentiable Corridor Rasterization\\
+for Referring Rail Segmentation}
+\author{Anonymous Authors}
+\date{}
+
+\begin{document}
+\maketitle
+
+This supplement collects the material that supports the main paper but is not required
+for its argument: the mechanistic positioning table, the SAM2 zero-shot oracle, the
+literature level references, the label-reconstruction audit, the inference-cost and
+rank-sweep measurements, the full hyperparameter record, and the reproducibility notes
+for the evaluation protocol.
+Section and table numbers below are local to this supplement; references to
+``the main paper'' point to the companion manuscript's own tables and sections.
+
+\appendix
+\input{sections/A_appendix_supp}
+
+\clearpage
+\bibliographystyle{IEEEtran}
+\bibliography{references}
+
+\end{document}
