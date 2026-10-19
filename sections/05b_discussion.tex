@@ -24,5 +24,4 @@ The carrier claim itself stands on A1 and on the failure mode of Figure~\ref{fig
 
 \paragraph{What this paper does and does not replace.}
 The two treatments are not substitutes: decoupling improves the encoder-side prompt that a generalist SAM2 receives, while ECF assumes a corridor target and changes the decoder.
-A natural next system would combine them: DeSa2VA-style split heads so that language remains rich, plus $\cR$ so that the visual stream carries a corridor field, with a verifier for forks that the two topology logits currently ignore.
-Orthogonal work can still improve the \emph{training signal}, e.g.\ token-weighted GRPO for video reasoning with focused thinking \citep{dang2025twgrpo}; this paper leaves RL aside and changes the mask carrier.
+We read them as alternatives for different target classes rather than as a refutation of either.

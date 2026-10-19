@@ -1,4 +1,4 @@
-\section{Conclusion and Limitations}
+\section{Conclusion}
 \label{sec:conclusion}
 
 We presented Ego-Corridor Fields for Sa2VA-style referring segmentation: a 20-D corridor parameterization predicted from the \Seg{} token and rasterized differentiably, with SAM2 bypassed.
@@ -7,18 +7,5 @@ On FIRC2234 test (original$\cup$hflip train), ECF-native decoding reaches gIoU 8
 The matched-training control A1 shows where the gain comes from: the identical trained backbone and head decoded by SAM2 collapse, so the improvement is attributable to the carrier rather than to fine-tuning alone.
 A1 and A2 further indicate that the raster loop is load-bearing: SAM2, as trained, does not read ECF embeddings (2.43 gIoU), and parameter supervision without mask loss leaves \PrAt{0.7} at 54.81, 33.2 points below the full model (87.98).
 The same checkpoint transfers eval-only to EgoPair (66.93) and RailBench 1L1R (54.21).
-
-\textbf{Limitations.}
-(1)~ECF assumes a corridor-shaped target; it is not a general RES decoder for compact instances.
-(2)~The carrier-versus-fine-tuning separation rests on A1, which reuses our trained weights and changes only the decoder; a Sa2VA fine-tuned with its native mask loss on FIRC is not evaluated.
-(3)~FIRC2234 carries a single caption template, so we can show robustness to paraphrase but not \emph{sensitivity} to a swapped target caption; a caption-swap probe needs multi-rail frames and remains the most important missing experiment.
-(4)~Topology logits are reserved but unused as a fork verifier; multi-rail disambiguation is future work.
-(5)~Transfer sets are eval-only fill-bands with a shared caption template, not independently annotated referring corpora.
-(6)~We do not re-implement DeSa2VA or parametric lane detectors on FIRC; the connection is mechanistic, not a head-to-head comparison.
-(7)~A weak width-monotonicity term is included but not claimed; a later, heavier physics recipe failed to help and is not a main result.
-(8)~Strict \PrAt{0.7} (87.98) sits 9.6 points below \PrAt{0.5} (97.6); residual errors concentrate on far-field thin structure.
-(9)~All main results come from a single training run on a single backbone (InternVL3-2B Sa2VA weights); run-to-run variance is not reported and the detector rows use a fixed leftmost-box rule (alternatives not swept).
-
-\textbf{Future work.}
-We are pursuing five directions: (i)~a caption-swap probe on multi-rail frames, for linguistic sensitivity rather than paraphrase robustness; (ii)~a Rail-Path Verifier on the topology logits for forks; (iii)~DeSa2VA-style split heads so that $\phih$ comes from a visual stream, not an entangled $h$; (iv)~dropping SAM2 from the training graph entirely; and (v)~video rails, where a corridor field has a natural temporal smoothness prior.
-Code, checkpoints, and evaluation scripts will be released upon acceptance under the source datasets' licenses, and the authors declare no competing interests.
+The supplementary material records the scope of these claims together with the open directions that follow from them.
+Code and evaluation scripts will be released at \url{https://github.com/lzdxwyh/ecf-corridor-fields} upon acceptance.

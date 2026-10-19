@@ -145,3 +145,24 @@ This is a single training schedule.
 ECF-native numbers are generated in fp32: take the first \Seg{} hidden state, apply ParamHead $\to \cR$, threshold at $0.5$.
 A1 uses the same LoRA and ParamHead weights but routes the \Seg{} embedding through SAM2, also in fp32, and detector reference rows use the same 208-frame test split, original captions, and mask-IoU protocol.
 fp16 evaluation is never reported: under fp16, \Seg{} decoding collapses in our runs.
+
+\section{Scope of the claims, limitations, and open directions}
+\label{app:limits}
+
+The main paper keeps this material out of its body; it is collected here so that the scope of each claim is on the record.
+
+\textbf{Limitations.}
+(1)~ECF assumes a corridor-shaped target; it is not a general RES decoder for compact instances.
+(2)~The carrier-versus-fine-tuning separation rests on A1, which reuses our trained weights and changes only the decoder; a Sa2VA fine-tuned with its native mask loss on FIRC is not evaluated.
+(3)~FIRC2234 carries a single caption template, so we can show robustness to paraphrase but not \emph{sensitivity} to a swapped target caption; a caption-swap probe needs multi-rail frames and remains the most important missing experiment.
+(4)~Topology logits are reserved but unused as a fork verifier; multi-rail disambiguation is not evaluated.
+(5)~Transfer sets are eval-only fill-bands with a shared caption template, not independently annotated referring corpora.
+(6)~We do not re-implement DeSa2VA or parametric lane detectors on FIRC; the connection is mechanistic, not a head-to-head comparison.
+(7)~A weak width-monotonicity term is included but not claimed; a later, heavier physics recipe failed to help and is not a main result.
+(8)~Strict \PrAt{0.7} (87.98) sits 9.6 points below \PrAt{0.5} (97.6); residual errors concentrate on far-field thin structure.
+(9)~All main results come from a single training run on a single backbone (InternVL3-2B Sa2VA weights); run-to-run variance is not reported and the detector rows use a fixed leftmost-box rule (alternatives not swept).
+
+\textbf{Open directions.}
+Five lines follow from these limits: (i)~a caption-swap probe on multi-rail frames, for linguistic sensitivity rather than paraphrase robustness; (ii)~a Rail-Path Verifier on the topology logits for forks; (iii)~DeSa2VA-style split heads so that $\phih$ comes from a visual stream, not an entangled $h$; (iv)~dropping SAM2 from the training graph entirely; and (v)~video rails, where a corridor field has a natural temporal smoothness prior.
+A natural next system would combine the two treatments: DeSa2VA-style split heads so that language remains rich, plus $\cR$ so that the visual stream carries a corridor field, with a verifier for forks that the two topology logits currently ignore.
+Orthogonal work can still improve the \emph{training signal}, e.g.\ token-weighted GRPO for video reasoning with focused thinking \citep{dang2025twgrpo}; the main paper leaves RL aside and changes the mask carrier.

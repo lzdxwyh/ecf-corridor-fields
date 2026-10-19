@@ -108,9 +108,9 @@ Table~\ref{tab:quant} lists the same comparison with the gIoU ratio to our row, 
 \toprule
 Method & \gIou & \PrAt{0.5} & \PrAt{0.7} & SegRate \\
 \midrule
-Sa2VA pretrained (no fine-tuning) & 14.32 & 13.46 & 9.13 & 100.0 \\
-GroundingDINO+SAM2 & 28.18 & 19.71 & 16.83 & 96.6 \\
-Qwen2.5-VL-7B+SAM2 & 25.60 & 23.56 & 17.31 & 100.0 \\
+Sa2VA pretrained~\citep{zhang2025sa2va} (no fine-tuning) & 14.32 & 13.46 & 9.13 & 100.0 \\
+GroundingDINO+SAM2~\citep{liu2024groundingdino} & 28.18 & 19.71 & 16.83 & 96.6 \\
+Qwen2.5-VL-7B+SAM2~\citep{bai2025qwen2vl} & 25.60 & 23.56 & 17.31 & 100.0 \\
 \midrule
 \textbf{Ours: ECF-native $\phih{\to}\cR$} & \textbf{80.67} & \textbf{97.6} & \textbf{87.98} & 100.0 \\
 \bottomrule
@@ -131,9 +131,9 @@ The mean gIoU gap in Table~\ref{tab:main} is therefore not an artifact of a few 
 \toprule
 Baseline & Win (\%) & Lose (\%) & Rescue (\%) \\
 \midrule
-pretrained Sa2VA & 93.8 & 6.2 & 97.2 \\
-GroundingDINO${+}$SAM2 & 89.4 & 10.6 & 97.0 \\
-Qwen2.5-VL-7B${+}$SAM2 & 90.9 & 9.1 & 96.9 \\
+pretrained Sa2VA~\citep{zhang2025sa2va} & 93.8 & 6.2 & 97.2 \\
+GroundingDINO${+}$SAM2~\citep{liu2024groundingdino} & 89.4 & 10.6 & 97.0 \\
+Qwen2.5-VL-7B${+}$SAM2~\citep{bai2025qwen2vl} & 90.9 & 9.1 & 96.9 \\
 \bottomrule
 \end{tabularx}
 \end{table}
@@ -252,14 +252,14 @@ RailSem19-EgoPair keeps frames with exactly one polyline pair ($n{=}300$ test) a
 \toprule
 Protocol / method & \gIou & \PrAt{0.5} & \PrAt{0.7} & SegRate \\
 \midrule
-EgoPair, pretrained Sa2VA & 12.48 & 8.67 & 5.67 & 100.0 \\
-EgoPair, GroundingDINO+SAM2 & 41.90 & 41.33 & 33.67 & 99.3 \\
-EgoPair, Qwen2.5-VL-7B+SAM2 & 38.93 & 42.67 & 31.33 & 100.0 \\
+EgoPair, pretrained Sa2VA~\citep{zhang2025sa2va} & 12.48 & 8.67 & 5.67 & 100.0 \\
+EgoPair, GroundingDINO+SAM2~\citep{liu2024groundingdino} & 41.90 & 41.33 & 33.67 & 99.3 \\
+EgoPair, Qwen2.5-VL-7B+SAM2~\citep{bai2025qwen2vl} & 38.93 & 42.67 & 31.33 & 100.0 \\
 \textbf{EgoPair, ECF (FIRC ckpt)} & \textbf{66.93} & \textbf{94.00} & \textbf{45.67} & 100.0 \\
 \midrule
-RailBench 1L1R, pretrained Sa2VA & 16.46 & 16.92 & 9.23 & 100.0 \\
-RailBench 1L1R, GroundingDINO+SAM2 & 46.35 & 49.62 & 38.08 & 99.2 \\
-RailBench 1L1R, Qwen2.5-VL-7B+SAM2 & 7.07 & 7.31 & 6.15 & 100.0 \\
+RailBench 1L1R, pretrained Sa2VA~\citep{zhang2025sa2va} & 16.46 & 16.92 & 9.23 & 100.0 \\
+RailBench 1L1R, GroundingDINO+SAM2~\citep{liu2024groundingdino} & 46.35 & 49.62 & 38.08 & 99.2 \\
+RailBench 1L1R, Qwen2.5-VL-7B+SAM2~\citep{bai2025qwen2vl} & 7.07 & 7.31 & 6.15 & 100.0 \\
 \textbf{RailBench 1L1R, ECF (FIRC ckpt)} & \textbf{54.21} & \textbf{70.38} & \textbf{31.92} & 100.0 \\
 \bottomrule
 \end{tabularx}
@@ -269,7 +269,7 @@ RailBench 1L1R, Qwen2.5-VL-7B+SAM2 & 7.07 & 7.31 & 6.15 & 100.0 \\
 A natural concern about a single-rail set is that the model may ignore the caption and segment the only rail present.
 FIRC2234 cannot settle this: every test frame carries the same caption string, and a caption that names a non-existent neighboring branch cannot be scored as an instance switch (Table~\ref{tab:data}).
 What we can show is insensitivity to a same-target paraphrase: with harder rephrasings of the \emph{same} target (same masks), ECF stays at 80.97 gIoU (Table~\ref{tab:hardref}), within 0.3 points of the 80.67 obtained with the original caption.
-A caption-swap probe, which feeds one frame the caption of a \emph{different} target and checks that the predicted mask moves, requires multi-rail frames with distinct per-rail captions, which FIRC2234 does not contain; we therefore flag it as the most important missing experiment for a linguistic-control claim (Section~\ref{sec:conclusion}) rather than over-read the paraphrase table.
+A caption-swap probe, which feeds one frame the caption of a \emph{different} target and checks that the predicted mask moves, requires multi-rail frames with distinct per-rail captions, which FIRC2234 does not contain; we therefore flag it as the most important missing experiment for a linguistic-control claim (supplementary material, Section~H) rather than over-read the paraphrase table.
 
 \begin{table}[t]
 \centering
@@ -281,7 +281,7 @@ A caption-swap probe, which feeds one frame the caption of a \emph{different} ta
 \toprule
 Caption / method & \gIou & \PrAt{0.5} & \PrAt{0.7} & SegRate \\
 \midrule
-Hard-ref, pretrained Sa2VA & 4.80 & 5.29 & 2.88 & 100.0 \\
+Hard-ref, pretrained Sa2VA~\citep{zhang2025sa2va} & 4.80 & 5.29 & 2.88 & 100.0 \\
 \textbf{Hard-ref, ECF} & \textbf{80.97} & \textbf{97.60} & \textbf{86.54} & 100.0 \\
 \bottomrule
 \end{tabularx}
