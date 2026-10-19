@@ -7,5 +7,4 @@ On FIRC2234 test (original$\cup$hflip train), ECF-native decoding reaches gIoU 8
 The matched-training control A1 shows where the gain comes from: the identical trained backbone and head decoded by SAM2 collapse, so the improvement is attributable to the carrier rather than to fine-tuning alone.
 A1 and A2 further indicate that the raster loop is load-bearing: SAM2, as trained, does not read ECF embeddings (2.43 gIoU), and parameter supervision without mask loss leaves \PrAt{0.7} at 54.81, 33.2 points below the full model (87.98).
 The same checkpoint transfers eval-only to EgoPair (66.93) and RailBench 1L1R (54.21).
-The supplementary material records the scope of these claims together with the open directions that follow from them.
 Code and evaluation scripts will be released at \url{https://github.com/lzdxwyh/ecf-corridor-fields} upon acceptance.
